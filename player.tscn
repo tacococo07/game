@@ -4,34 +4,43 @@
 [ext_resource type="Script" uid="uid://cjvqm1qwpcrio" path="res://player.gd" id="1_onrkg"]
 [ext_resource type="Texture2D" uid="uid://bwk1bdmh1lxif" path="res://stool.png" id="3_i3pqv"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_i3pqv"]
+size = Vector2(1166, 130)
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yf5fn"]
 radius = 12.0
 height = 32.0
 
-[node name="Player" type="Area2D" unique_id=373483958]
-position = Vector2(566, 315)
-script = ExtResource("1_onrkg")
+[node name="Node2D" type="Node2D" unique_id=1175559402]
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1109834001]
-offset_left = -2232.0
-offset_top = -1697.0
-offset_right = 2837.0
-offset_bottom = 1706.0
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=695729653]
+
+[node name="ColorRect" type="ColorRect" parent="StaticBody2D" unique_id=1109834001]
+offset_left = -1666.0
+offset_top = -1382.0
+offset_right = 3403.0
+offset_bottom = 2021.0
 color = Color(0.7019608, 0.89411765, 1, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=720318970]
-position = Vector2(19.750006, 5.499998)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1336531608]
+position = Vector2(572, 583)
+shape = SubResource("RectangleShape2D_i3pqv")
+
+[node name="Sprite2D" type="Sprite2D" parent="StaticBody2D" unique_id=345673318]
+position = Vector2(577, 512)
+scale = Vector2(36.09375, 21.937498)
+texture = ExtResource("3_i3pqv")
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=751100945]
+position = Vector2(583, 311)
+script = ExtResource("1_onrkg")
+
+[node name="Sprite2D2" type="Sprite2D" parent="Player" unique_id=720318970]
+position = Vector2(0.75, 9.5)
 scale = Vector2(2.468749, 2.9374988)
 texture = ExtResource("1_4flbx")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=170439842]
-position = Vector2(19, -5)
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Player" unique_id=170439842]
+position = Vector2(0, -1)
 rotation = -0.8729324
 shape = SubResource("CapsuleShape2D_yf5fn")
-
-[node name="Area2D" type="Area2D" parent="." unique_id=635203354]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1336531608]
-
-[node name="Sprite2D" type="Sprite2D" parent="Area2D" unique_id=345673318]
-texture = ExtResource("3_i3pqv")
