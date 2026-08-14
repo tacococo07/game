@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dx84n7ihp6fv7"
-path="res://.godot/imported/cuesor.png-88d5b22a73fe8772cf4633e90ad93661.ctex"
+path="res://.godot/imported/cuesor.png-61f9ebe5e4435fe2ada875722c796507.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://cuesor.png"
-dest_files=["res://.godot/imported/cuesor.png-88d5b22a73fe8772cf4633e90ad93661.ctex"]
+source_file="res://sprites/cuesor.png"
+dest_files=["res://.godot/imported/cuesor.png-61f9ebe5e4435fe2ada875722c796507.ctex"]
 
 [params]
 
