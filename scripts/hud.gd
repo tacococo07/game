@@ -6,6 +6,8 @@ var money: int = 0
 var timer_running: bool = false
 var second_timer: float = 0.0
 
+var gravity_multiplier_active: bool = false
+
 
 func _ready() -> void:
 	$TimerLabel.text = "0"
@@ -26,13 +28,13 @@ func _process(delta: float) -> void:
 
 
 func start_run() -> void:
+	# ONLY reset the timer.
+	# Money is permanent between rounds.
 	survival_time = 0
-	money = 0
 	second_timer = 0.0
 	timer_running = true
 
 	$TimerLabel.text = "0"
-	$MoneyLabel.text = "$0"
 
 
 func end_run() -> void:
@@ -41,14 +43,25 @@ func end_run() -> void:
 
 	timer_running = false
 
-	# $2 for every second survived.
-	money = survival_time * 2
+	var multiplier: int = 2
 
-	# Show the money earned.
+	if gravity_multiplier_active:
+		multiplier = 5
+
+	var money_earned: int = survival_time * multiplier
+
+	money += money_earned
+
 	$MoneyLabel.text = "$" + str(money)
 
-	# Reset the timer after converting the time to money.
+	# Reset the timer, NOT the money.
 	survival_time = 0
 	second_timer = 0.0
 
 	$TimerLabel.text = "0"
+
+	gravity_multiplier_active = false
+
+
+func set_gravity_multiplier(active: bool) -> void:
+	gravity_multiplier_active = active

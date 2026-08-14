@@ -11,6 +11,8 @@ var player: CharacterBody2D = null
 var shooting: bool = false
 var run_started: bool = false
 
+var gravity_bullets_enabled: bool = false
+
 var bullets: Array[Area2D] = []
 var volley_bullets: Array[Area2D] = []
 
@@ -21,11 +23,17 @@ var hit_count: int = 0
 func _ready() -> void:
 	$AnimatedSprite2D.stop()
 
-	$DetectionArea.body_entered.connect(_on_player_entered)
-	$AnimatedSprite2D.frame_changed.connect(_on_animation_frame_changed)
+	$DetectionArea.body_entered.connect(
+		_on_player_entered
+	)
+
+	$AnimatedSprite2D.frame_changed.connect(
+		_on_animation_frame_changed
+	)
 
 
 func _process(delta: float) -> void:
+
 	for bullet in bullets.duplicate():
 
 		if not is_instance_valid(bullet):
@@ -36,7 +44,10 @@ func _process(delta: float) -> void:
 		if player == null or not is_instance_valid(player):
 			continue
 
-		var homing: bool = bullet.get_meta("homing", false)
+		var homing: bool = bullet.get_meta(
+			"homing",
+			false
+		)
 
 		# HOMING BULLET
 		if homing:
@@ -45,19 +56,22 @@ func _process(delta: float) -> void:
 				player.global_position
 			)
 
-			bullet.global_position += direction * homing_bullet_speed * delta
+			bullet.global_position += (
+				direction
+				* homing_bullet_speed
+				* delta
+			)
 
 		# NORMAL BULLET
 		else:
 
-			var velocity: Vector2 = bullet.get_meta(
+			var bullet_velocity: Vector2 = bullet.get_meta(
 				"velocity",
 				Vector2.ZERO
 			)
 
-			bullet.global_position += velocity * delta
+			bullet.global_position += bullet_velocity * delta
 
-			# Delete normal bullets when they leave the screen.
 			var screen_size: Vector2 = get_viewport_rect().size
 			var margin: float = 100.0
 
@@ -67,6 +81,7 @@ func _process(delta: float) -> void:
 				or bullet.global_position.y < -margin
 				or bullet.global_position.y > screen_size.y + margin
 			):
+
 				bullet.queue_free()
 
 				bullets.erase(bullet)
@@ -76,13 +91,18 @@ func _process(delta: float) -> void:
 
 				continue
 
-		# CHECK FOR PLAYER HIT
+		# PLAYER HIT
 		if (
 			is_instance_valid(bullet)
 			and bullet.global_position.distance_to(
 				player.global_position
 			) <= bullet_radius + 10.0
 		):
+
+			# Gravity Bullet hits the player.
+			if gravity_bullets_enabled:
+				player.apply_gravity_effect()
+
 			bullet.queue_free()
 
 			bullets.erase(bullet)
@@ -90,7 +110,7 @@ func _process(delta: float) -> void:
 
 			hit_count += 1
 
-			# SECOND HIT = END THE RUN
+			# Two hits ends the run.
 			if hit_count >= 2:
 				reset_barrage()
 			else:
@@ -103,18 +123,16 @@ func _on_player_entered(body: Node2D) -> void:
 
 		player = body
 
-		# First touch starts a completely new run.
 		if not run_started:
 
 			run_started = true
-
-			$"../HUD".start_run()
-
 			hit_count = 0
 			volley_number = 1
 
-		# Start the barrage if the cube isn't already firing.
+			$"../HUD".start_run()
+
 		if not shooting and volley_bullets.is_empty():
+
 			start_shooting()
 
 
@@ -139,26 +157,22 @@ func _on_animation_frame_changed() -> void:
 func shoot_volley() -> void:
 
 	shooting = false
-
 	volley_bullets.clear()
 
 	var bullet_count: int
 
-	# 1 -> 2 -> 3
 	if volley_number < 4:
 
 		bullet_count = volley_number
 
-	# After that, random 1 -> 4
 	else:
 
 		bullet_count = randi_range(1, 4)
 
-	# If there are exactly 4 bullets,
-	# choose ONE to be homing.
 	var homing_index: int = -1
 
 	if bullet_count == 4:
+
 		homing_index = randi_range(0, 3)
 
 	for i in range(bullet_count):
@@ -171,7 +185,6 @@ func shoot_volley() -> void:
 			bullet_count
 		)
 
-	# Progress toward the random stage.
 	if volley_number < 4:
 		volley_number += 1
 
@@ -189,21 +202,19 @@ func create_bullet(
 
 	bullet.name = "Bullet"
 
-	# Don't let the bullet collide with the cube.
+	# Bullets don't collide with the cube.
 	bullet.collision_layer = 0
 	bullet.collision_mask = 1
 
-	# Collision shape.
 	var collision := CollisionShape2D.new()
-
 	var circle := CircleShape2D.new()
-	circle.radius = bullet_radius
 
+	circle.radius = bullet_radius
 	collision.shape = circle
 
 	bullet.add_child(collision)
 
-	# Red temporary bullet visual.
+	# Temporary bullet visual.
 	var visual := Polygon2D.new()
 
 	visual.polygon = PackedVector2Array([
@@ -213,13 +224,16 @@ func create_bullet(
 		Vector2(0, bullet_radius)
 	])
 
-	visual.color = Color.RED
+	# Gravity bullets are blue.
+	if gravity_bullets_enabled:
+		visual.color = Color.BLUE
+	else:
+		visual.color = Color.RED
 
 	bullet.add_child(visual)
 
 	get_tree().current_scene.add_child(bullet)
 
-	# Aim toward where the player is NOW.
 	var direction: Vector2 = global_position.direction_to(
 		player.global_position
 	)
@@ -227,7 +241,9 @@ func create_bullet(
 	# Spread bullets apart.
 	if total_bullets > 1:
 
-		var center: float = float(total_bullets - 1) / 2.0
+		var center: float = (
+			float(total_bullets - 1) / 2.0
+		)
 
 		var angle_offset: float = (
 			float(index) - center
@@ -237,13 +253,11 @@ func create_bullet(
 			deg_to_rad(angle_offset)
 		)
 
-	# Spawn outside the cube.
 	bullet.global_position = (
 		global_position
 		+ direction * spawn_distance
 	)
 
-	# Remember whether this bullet is homing.
 	bullet.set_meta(
 		"homing",
 		homing
@@ -269,9 +283,6 @@ func create_bullet(
 
 func check_barrage_progress() -> void:
 
-	# Wait for normal bullets from the current volley.
-	#
-	# Homing bullets DON'T count here.
 	for bullet in volley_bullets:
 
 		if is_instance_valid(bullet):
@@ -280,12 +291,9 @@ func check_barrage_progress() -> void:
 				"homing",
 				false
 			):
+
 				return
 
-	# All normal bullets are gone.
-	#
-	# Any homing bullets are allowed to keep chasing
-	# while the next volley begins.
 	volley_bullets.clear()
 
 	if (
@@ -293,20 +301,17 @@ func check_barrage_progress() -> void:
 		and is_instance_valid(player)
 		and run_started
 	):
+
 		start_shooting()
 
 
 func reset_barrage() -> void:
 
-	# Stop the barrage.
 	shooting = false
 
-	# Reset progression.
 	volley_number = 1
 	hit_count = 0
 
-	# Delete ALL active bullets,
-	# including homing bullets.
 	for bullet in bullets:
 
 		if is_instance_valid(bullet):
@@ -315,13 +320,11 @@ func reset_barrage() -> void:
 	bullets.clear()
 	volley_bullets.clear()
 
-	# Reset cube animation.
 	$AnimatedSprite2D.stop()
 	$AnimatedSprite2D.frame = 0
 
-	# End the timer and calculate money.
 	if run_started:
 		$"../HUD".end_run()
 
-	# The player must touch the cube again.
+	# Player must touch the cube again.
 	run_started = false

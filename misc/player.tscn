@@ -1,12 +1,13 @@
 [gd_scene format=3 uid="uid://ckudr8chj1kgo"]
 
-[ext_resource type="Texture2D" uid="uid://dx84n7ihp6fv7" path="res://sprites/cuesor.png" id="1_4flbx"]
-[ext_resource type="Script" uid="uid://cjvqm1qwpcrio" path="res://scripts/player.gd" id="1_onrkg"]
-[ext_resource type="Texture2D" uid="uid://bwk1bdmh1lxif" path="res://sprites/stool.png" id="3_i3pqv"]
-[ext_resource type="Texture2D" uid="uid://ccjypv3iqpw30" path="res://sprites/cube-sheet.png" id="4_hqtel"]
-[ext_resource type="Script" uid="uid://btxdq2q4dkhdq" path="res://scripts/cube.gd" id="4_sweqy"]
-[ext_resource type="Script" uid="uid://cg8yakgevo7wv" path="res://scripts/hud.gd" id="6_2hs0m"]
-[ext_resource type="FontFile" uid="uid://daset1cy8jxco" path="res://misc/PixelPurl.ttf" id="7_1jxqw"]
+[ext_resource type="Texture2D" uid="uid://bwk1bdmh1lxif" path="res://sprites/stool.png" id="1_w7ei0"]
+[ext_resource type="Script" uid="uid://cjvqm1qwpcrio" path="res://scripts/player.gd" id="2_6n0t1"]
+[ext_resource type="Texture2D" uid="uid://dx84n7ihp6fv7" path="res://sprites/cuesor.png" id="3_qpdbv"]
+[ext_resource type="Script" uid="uid://btxdq2q4dkhdq" path="res://scripts/cube.gd" id="4_nwjux"]
+[ext_resource type="Texture2D" uid="uid://ccjypv3iqpw30" path="res://sprites/cube-sheet.png" id="5_vgsro"]
+[ext_resource type="Script" uid="uid://cg8yakgevo7wv" path="res://scripts/hud.gd" id="6_utexf"]
+[ext_resource type="FontFile" uid="uid://daset1cy8jxco" path="res://misc/PixelPurl.ttf" id="7_mnp6i"]
+[ext_resource type="Script" uid="uid://x7k1yrchlylb" path="res://sprites/shop.gd" id="8_g7l3s"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_i3pqv"]
 size = Vector2(1166, 130)
@@ -16,43 +17,43 @@ radius = 12.0
 height = 32.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_sweqy"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2hs0m"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(32, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1jxqw"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(64, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dw050"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(96, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b26j0"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(128, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n7ghd"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(160, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nvl01"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(192, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ivps1"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(224, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_urp6f"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(256, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bwjto"]
-atlas = ExtResource("4_hqtel")
+atlas = ExtResource("5_vgsro")
 region = Rect2(288, 0, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_yf5fn"]
@@ -105,14 +106,21 @@ size = Vector2(18.488407, 25.126637)
 size = Vector2(20.590446, 26.334637)
 
 [sub_resource type="LabelSettings" id="LabelSettings_yf5fn"]
-font = ExtResource("7_1jxqw")
+font = ExtResource("7_mnp6i")
 font_size = 60
 font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_g4v7s"]
-font = ExtResource("7_1jxqw")
+font = ExtResource("7_mnp6i")
 font_size = 50
 font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="Gradient" id="Gradient_2qya1"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_57qmd"]
+gradient = SubResource("Gradient_2qya1")
+width = 300
+use_hdr = true
 
 [node name="Node2D" type="Node2D" unique_id=1175559402]
 position = Vector2(6, 30)
@@ -120,10 +128,10 @@ position = Vector2(6, 30)
 [node name="floor" type="StaticBody2D" parent="." unique_id=695729653]
 
 [node name="ColorRect" type="ColorRect" parent="floor" unique_id=1109834001]
-offset_left = -1666.0
-offset_top = -1382.0
-offset_right = 3403.0
-offset_bottom = 2021.0
+offset_left = -1558.0
+offset_top = -1312.0
+offset_right = 3511.0
+offset_bottom = 2091.0
 color = Color(0.7019608, 0.89411765, 1, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="floor" unique_id=1336531608]
@@ -133,47 +141,47 @@ shape = SubResource("RectangleShape2D_i3pqv")
 [node name="Sprite2D" type="Sprite2D" parent="floor" unique_id=345673318]
 position = Vector2(571.00006, 510)
 scale = Vector2(36.09375, 21.937498)
-texture = ExtResource("3_i3pqv")
+texture = ExtResource("1_w7ei0")
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=751100945]
 position = Vector2(583, 311)
-script = ExtResource("1_onrkg")
+script = ExtResource("2_6n0t1")
 
 [node name="Sprite2D2" type="Sprite2D" parent="Player" unique_id=720318970]
 position = Vector2(0.75, 9.5)
 scale = Vector2(2.468749, 2.9374988)
-texture = ExtResource("1_4flbx")
+texture = ExtResource("3_qpdbv")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Player" unique_id=170439842]
 position = Vector2(0, -1)
 rotation = -0.8729324
 shape = SubResource("CapsuleShape2D_yf5fn")
 
-[node name="cube" type="CharacterBody2D" parent="." unique_id=1668139204]
+[node name="Cube" type="CharacterBody2D" parent="." unique_id=1668139204]
 position = Vector2(566, 481)
 scale = Vector2(5.5710597, 4.1390343)
-script = ExtResource("4_sweqy")
+script = ExtResource("4_nwjux")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="cube" unique_id=1236495637]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Cube" unique_id=1236495637]
 position = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_yf5fn")
 animation = &"shoot"
 frame = 9
 frame_progress = 1.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="cube" unique_id=311722251]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cube" unique_id=311722251]
 position = Vector2(3.320732, -0.72480774)
 shape = SubResource("RectangleShape2D_g4v7s")
 
-[node name="DetectionArea" type="Area2D" parent="cube" unique_id=194554605]
+[node name="DetectionArea" type="Area2D" parent="Cube" unique_id=194554605]
 position = Vector2(3.051484, 0)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="cube/DetectionArea" unique_id=774689008]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cube/DetectionArea" unique_id=774689008]
 position = Vector2(0.29522705, -1.3288116)
 shape = SubResource("RectangleShape2D_yf5fn")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=932900822]
-script = ExtResource("6_2hs0m")
+script = ExtResource("6_utexf")
 
 [node name="MoneyLabel" type="Label" parent="HUD" unique_id=912815764]
 anchors_preset = -1
@@ -192,3 +200,23 @@ offset_right = 525.0
 offset_bottom = 59.0
 text = "0"
 label_settings = SubResource("LabelSettings_g4v7s")
+
+[node name="shop" type="CanvasLayer" parent="HUD" unique_id=1863934643]
+script = ExtResource("8_g7l3s")
+
+[node name="Panel" type="Panel" parent="HUD/shop" unique_id=1605900413]
+anchors_preset = -1
+anchor_right = 0.035
+anchor_bottom = 0.062000003
+offset_left = 350.0
+offset_top = 149.0
+offset_right = 772.68
+offset_bottom = 503.824
+
+[node name="GravityBulletsButton" type="Button" parent="HUD/shop" unique_id=1850453510]
+offset_left = 359.0
+offset_top = 175.0
+offset_right = 805.0
+offset_bottom = 247.0
+text = "gravity bullet $50"
+icon = SubResource("GradientTexture2D_57qmd")
