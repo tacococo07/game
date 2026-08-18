@@ -8,11 +8,12 @@ var second_timer: float = 0.0
 
 var gravity_multiplier_active: bool = false
 
+@onready var save_manager = get_node("/root/Node2D/SaveManager")
 
 func _ready() -> void:
+	money = save_manager.money
+	update_money_display()
 	$TimerLabel.text = "0"
-	$MoneyLabel.text = "$0"
-
 
 func _process(delta: float) -> void:
 	if not timer_running:
@@ -23,19 +24,13 @@ func _process(delta: float) -> void:
 	if second_timer >= 1.0:
 		second_timer -= 1.0
 		survival_time += 1
-
 		$TimerLabel.text = str(survival_time)
 
-
 func start_run() -> void:
-	# ONLY reset the timer.
-	# Money is permanent between rounds.
 	survival_time = 0
 	second_timer = 0.0
 	timer_running = true
-
 	$TimerLabel.text = "0"
-
 
 func end_run() -> void:
 	if not timer_running:
@@ -44,24 +39,26 @@ func end_run() -> void:
 	timer_running = false
 
 	var multiplier: int = 2
-
 	if gravity_multiplier_active:
 		multiplier = 5
 
 	var money_earned: int = survival_time * multiplier
-
 	money += money_earned
 
-	$MoneyLabel.text = "$" + str(money)
+	update_money_display()
 
-	# Reset the timer, NOT the money.
+	# Save after earning money
+	save_manager.money = money
+	save_manager.save_data()
+
 	survival_time = 0
 	second_timer = 0.0
-
 	$TimerLabel.text = "0"
 
 	gravity_multiplier_active = false
 
-
 func set_gravity_multiplier(active: bool) -> void:
 	gravity_multiplier_active = active
+
+func update_money_display() -> void:
+	$MoneyLabel.text = "$" + str(money)
