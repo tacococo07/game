@@ -8,7 +8,7 @@ var second_timer: float = 0.0
 
 var gravity_multiplier_active: bool = false
 
-@onready var save_manager = get_node("/root/Node2D/SaveManager")
+@onready var save_manager = $"../Node"
 
 func _ready() -> void:
 	money = save_manager.money
@@ -47,7 +47,6 @@ func end_run() -> void:
 
 	update_money_display()
 
-	# Save after earning money
 	save_manager.money = money
 	save_manager.save_data()
 

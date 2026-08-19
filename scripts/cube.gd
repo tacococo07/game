@@ -20,6 +20,12 @@ var volley_number: int = 1
 var hit_count: int = 0
 
 @onready var run_music = $AudioStreamPlayer
+@onready var shoot_sound = $ShootSound
+
+# For the 10-second tail loop
+var tail_start_time: float = 0.0
+var music_total_length: float = 0.0
+var is_using_tail: bool = false
 
 func _ready() -> void:
 	$AnimatedSprite2D.stop()
@@ -71,6 +77,15 @@ func _process(delta: float) -> void:
 			else:
 				check_barrage_progress()
 
+	# --- 10-second tail loop logic (inside the existing _process) ---
+	if run_music.playing and not is_using_tail and music_total_length > 0:
+		if run_music.get_playback_position() >= tail_start_time:
+			is_using_tail = true
+	
+	if run_music.playing and is_using_tail:
+		if run_music.get_playback_position() >= music_total_length:
+			run_music.play(tail_start_time)
+
 
 func _on_player_entered(body: Node2D) -> void:
 	if body is CharacterBody2D and body.name == "Player":
@@ -82,11 +97,14 @@ func _on_player_entered(body: Node2D) -> void:
 			volley_number = 1
 			$"../HUD".start_run()
 
-			# --- MUSIC SWAP START ---
 			if not run_music.playing:
+				if run_music.stream:
+					music_total_length = run_music.stream.get_length()
+					tail_start_time = music_total_length - 10.0
+				
+				is_using_tail = false
 				run_music.play()
 			get_node("/root/Node2D").stop_idle()
-			# --- MUSIC SWAP END ---
 
 		if not shooting and volley_bullets.is_empty():
 			start_shooting()
@@ -110,6 +128,9 @@ func _on_animation_frame_changed() -> void:
 func shoot_volley() -> void:
 	shooting = false
 	volley_bullets.clear()
+
+	if not shoot_sound.playing:
+		shoot_sound.play()
 
 	var bullet_count: int
 
@@ -200,11 +221,10 @@ func reset_barrage() -> void:
 	volley_number = 1
 	hit_count = 0
 
-	# --- MUSIC SWAP START ---
 	if run_music.playing:
 		run_music.stop()
+		is_using_tail = false
 	get_node("/root/Node2D").resume_idle()
-	# --- MUSIC SWAP END ---
 
 	for bullet in bullets:
 		if is_instance_valid(bullet):

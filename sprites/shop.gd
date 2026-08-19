@@ -1,14 +1,18 @@
 extends CanvasLayer
 
 @export var gravity_bullets_price: int = 50
+@export var retaliation_price: int = 75
 
 var gravity_bullets_bought: bool = false
+var retaliation_unlocked: bool = false
 
 var cube: CharacterBody2D
 var hud: CanvasLayer
-var gravity_button: Button
 
-@onready var save_manager = $"../../Node/SaveManager"
+@onready var save_manager = $"../../Node"
+
+@onready var gravity_button: Button = $Panel/GravityBulletsButton
+@onready var retaliation_button: Button = $Panel/RetaliationButton
 
 func _ready() -> void:
 	visible = false
@@ -16,17 +20,23 @@ func _ready() -> void:
 	cube = get_node("../../Cube")
 	hud = get_node("..")
 
-	gravity_button = find_child("GravityBulletsButton", true, false) as Button
 	if gravity_button == null:
-		push_error("Could not find GravityBulletsButton.")
+		push_error("Could not find GravityBulletsButton in the scene!")
+		return
+	if retaliation_button == null:
+		push_error("Could not find RetaliationButton in the scene!")
 		return
 
 	gravity_button.pressed.connect(_buy_gravity_bullets)
+	retaliation_button.pressed.connect(_buy_retaliation)
 
 	gravity_bullets_bought = save_manager.gravity_bullets_bought
+	retaliation_unlocked = save_manager.retaliation_unlocked
+
 	if gravity_bullets_bought:
-		cube.gravity_bullets_enabled = true
 		gravity_button.visible = false
+	if retaliation_unlocked:
+		retaliation_button.visible = false
 
 	update_button()
 
@@ -63,6 +73,25 @@ func _buy_gravity_bullets() -> void:
 
 	gravity_button.visible = false
 
+func _buy_retaliation() -> void:
+	if retaliation_unlocked:
+		return
+	if hud.money < retaliation_price:
+		return
+
+	hud.money -= retaliation_price
+	hud.update_money_display()
+
+	retaliation_unlocked = true
+
+	save_manager.retaliation_unlocked = true
+	save_manager.money = hud.money
+	save_manager.save_data()
+
+	retaliation_button.visible = false
+
 func update_button() -> void:
 	if gravity_button != null:
 		gravity_button.text = "GRAVITY BULLETS\n$" + str(gravity_bullets_price)
+	if retaliation_button != null:
+		retaliation_button.text = "RETALIATION\n$" + str(retaliation_price)

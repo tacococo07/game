@@ -8,16 +8,14 @@ var gravity_active: bool = false
 var gravity_timer: float = 0.0
 
 @onready var cube: CharacterBody2D = $"../Cube"
-
+@onready var save_manager = get_node("/root/Node2D/Node")
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
-
 func _physics_process(delta: float) -> void:
 	var mouse_position: Vector2 = get_global_mouse_position()
 
-	# If the run has ended, immediately remove gravity.
 	if not cube.run_started and not cube.shooting:
 		gravity_active = false
 		gravity_timer = 0.0
@@ -25,30 +23,44 @@ func _physics_process(delta: float) -> void:
 
 	if gravity_active:
 		gravity_timer -= delta
-
-		# Follow the mouse horizontally.
 		var x_difference: float = mouse_position.x - global_position.x
 		velocity.x = x_difference * 20.0
-
-		# Gravity pulls downward.
 		velocity.y += gravity_strength * delta
-
 		move_and_slide()
-
 		if gravity_timer <= 0.0:
 			gravity_active = false
 			velocity = Vector2.ZERO
-
 	else:
-		# Normal mouse-following movement.
 		var difference: Vector2 = mouse_position - global_position
-
 		velocity = difference * 20.0
-
 		move_and_slide()
-
 
 func apply_gravity_effect() -> void:
 	gravity_active = true
 	gravity_timer = gravity_duration
 	velocity.y = 0.0
+	trigger_retaliation()
+
+func trigger_retaliation() -> void:
+	if not save_manager.retaliation_unlocked:
+		return
+
+	var shockwave = Area2D.new()
+	shockwave.name = "Shockwave"
+
+	var collision = CollisionShape2D.new()
+	var shape = CircleShape2D.new()
+	shape.radius = 150.0
+	collision.shape = shape
+	shockwave.add_child(collision)
+
+	var tween = create_tween()
+	tween.tween_property(shockwave, "scale", Vector2(3, 3), 0.2)
+	tween.tween_callback(shockwave.queue_free)
+
+	shockwave.area_entered.connect(func(area):
+		if area.name == "Bullet":
+			area.queue_free()
+	)
+
+	add_child(shockwave)
