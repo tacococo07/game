@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="New Game Project"
+config/name="death cube"
 run/main_scene="uid://ckudr8chj1kgo"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://sprites/icon.svg"

@@ -49,6 +49,12 @@ func toggle_shop() -> void:
 	if visible:
 		visible = false
 		return
+
+	# Re-read save state every time the shop opens
+	retaliation_unlocked = save_manager.retaliation_unlocked
+	if retaliation_unlocked:
+		retaliation_button.visible = false
+
 	if cube.shooting:
 		return
 	if cube.run_started:

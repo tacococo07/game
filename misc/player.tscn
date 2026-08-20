@@ -189,10 +189,10 @@ script = ExtResource("6_utexf")
 [node name="MoneyLabel" type="Label" parent="HUD" unique_id=912815764]
 anchors_preset = -1
 anchor_right = 0.038000003
-offset_left = 1083.0
-offset_top = 15.0
-offset_right = 1083.224
-offset_bottom = 59.0
+offset_left = 906.0
+offset_top = 14.0
+offset_right = 915.224
+offset_bottom = 66.0
 text = "$0"
 label_settings = SubResource("LabelSettings_yf5fn")
 

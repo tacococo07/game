@@ -45,22 +45,8 @@ func trigger_retaliation() -> void:
 	if not save_manager.retaliation_unlocked:
 		return
 
-	var shockwave = Area2D.new()
-	shockwave.name = "Shockwave"
-
-	var collision = CollisionShape2D.new()
-	var shape = CircleShape2D.new()
-	shape.radius = 150.0
-	collision.shape = shape
-	shockwave.add_child(collision)
-
-	var tween = create_tween()
-	tween.tween_property(shockwave, "scale", Vector2(3, 3), 0.2)
-	tween.tween_callback(shockwave.queue_free)
-
-	shockwave.area_entered.connect(func(area):
-		if area.name == "Bullet":
-			area.queue_free()
-	)
-
-	add_child(shockwave)
+	# Destroy all bullets in the "bullets" group
+	var bullets = get_tree().get_nodes_in_group("bullets")
+	for bullet in bullets:
+		if is_instance_valid(bullet):
+			bullet.queue_free()

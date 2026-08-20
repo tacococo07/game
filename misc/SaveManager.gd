@@ -15,7 +15,6 @@ func save_data() -> void:
 	config.set_value("player_data", "gravity_bullets_bought", gravity_bullets_bought)
 	config.set_value("player_data", "retaliation_unlocked", retaliation_unlocked)
 	config.save(SAVE_PATH)
-	print("Saved: money = ", money, ", gravity = ", gravity_bullets_bought, ", retaliation = ", retaliation_unlocked)
 
 func load_data() -> void:
 	if not FileAccess.file_exists(SAVE_PATH):
@@ -29,4 +28,3 @@ func load_data() -> void:
 	money = config.get_value("player_data", "money", 0)
 	gravity_bullets_bought = config.get_value("player_data", "gravity_bullets_bought", false)
 	retaliation_unlocked = config.get_value("player_data", "retaliation_unlocked", false)
-	print("Loaded: money = ", money, ", gravity = ", gravity_bullets_bought, ", retaliation = ", retaliation_unlocked)

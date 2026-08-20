@@ -13,8 +13,8 @@ var run_started: bool = false
 
 var gravity_bullets_enabled: bool = false
 
-var bullets: Array[Area2D] = []
-var volley_bullets: Array[Area2D] = []
+var bullets: Array[CharacterBody2D] = []
+var volley_bullets: Array[CharacterBody2D] = []
 
 var volley_number: int = 1
 var hit_count: int = 0
@@ -22,10 +22,11 @@ var hit_count: int = 0
 @onready var run_music = $AudioStreamPlayer
 @onready var shoot_sound = $ShootSound
 
-# For the 10-second tail loop
 var tail_start_time: float = 0.0
 var music_total_length: float = 0.0
 var is_using_tail: bool = false
+
+@onready var save_manager = get_node("/root/Node2D/Node")
 
 func _ready() -> void:
 	$AnimatedSprite2D.stop()
@@ -34,13 +35,13 @@ func _ready() -> void:
 	$AnimatedSprite2D.frame_changed.connect(_on_animation_frame_changed)
 
 func _process(delta: float) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+
 	for bullet in bullets.duplicate():
 		if not is_instance_valid(bullet):
 			bullets.erase(bullet)
 			volley_bullets.erase(bullet)
-			continue
-
-		if player == null or not is_instance_valid(player):
 			continue
 
 		var homing: bool = bullet.get_meta("homing", false)
@@ -62,22 +63,31 @@ func _process(delta: float) -> void:
 				check_barrage_progress()
 				continue
 
-		if is_instance_valid(bullet) and bullet.global_position.distance_to(player.global_position) <= bullet_radius + 10.0:
+		var distance = bullet.global_position.distance_to(player.global_position)
+		if distance <= bullet_radius + 10.0:
 			if gravity_bullets_enabled:
 				player.apply_gravity_effect()
-
-			bullet.queue_free()
+			
+			bullet.visible = false
+			bullet.set_process(false)
+			bullet.set_physics_process(false)
+			bullet.call_deferred("queue_free")
+			
 			bullets.erase(bullet)
 			volley_bullets.erase(bullet)
-
+			
 			hit_count += 1
 
+			# 🔥 RETALIATION TRIGGER — fires on EVERY hit
+			if save_manager.retaliation_unlocked:
+				clear_all_bullets()
+			
 			if hit_count >= 2:
 				reset_barrage()
 			else:
 				check_barrage_progress()
 
-	# --- 10-second tail loop logic (inside the existing _process) ---
+	# --- 10-second tail loop ---
 	if run_music.playing and not is_using_tail and music_total_length > 0:
 		if run_music.get_playback_position() >= tail_start_time:
 			is_using_tail = true
@@ -156,10 +166,12 @@ func create_bullet(homing: bool, index: int, total_bullets: int) -> void:
 	if player == null or not is_instance_valid(player):
 		return
 
-	var bullet := Area2D.new()
+	var bullet := CharacterBody2D.new()
 	bullet.name = "Bullet"
+	bullet.add_to_group("bullets")
+
 	bullet.collision_layer = 0
-	bullet.collision_mask = 1
+	bullet.collision_mask = 0
 
 	var collision := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
@@ -226,12 +238,7 @@ func reset_barrage() -> void:
 		is_using_tail = false
 	get_node("/root/Node2D").resume_idle()
 
-	for bullet in bullets:
-		if is_instance_valid(bullet):
-			bullet.queue_free()
-
-	bullets.clear()
-	volley_bullets.clear()
+	clear_all_bullets()
 
 	$AnimatedSprite2D.stop()
 	$AnimatedSprite2D.frame = 0
@@ -240,3 +247,14 @@ func reset_barrage() -> void:
 		$"../HUD".end_run()
 
 	run_started = false
+
+
+func clear_all_bullets() -> void:
+	for bullet in bullets:
+		if is_instance_valid(bullet):
+			bullet.visible = false
+			bullet.set_process(false)
+			bullet.set_physics_process(false)
+			bullet.call_deferred("queue_free")
+	bullets.clear()
+	volley_bullets.clear()
