@@ -4,7 +4,7 @@ extends CharacterBody2D
 @export var homing_bullet_speed: float = 220.0
 @export var bullet_radius: float = 6.0
 @export var spawn_distance: float = 30.0
-@export var bullet_spread: float = 12.0
+@export var bullet_spread: float = 15.0  # Increased for better spread
 
 var player: CharacterBody2D = null
 
@@ -33,6 +33,7 @@ func _ready() -> void:
 
 	$DetectionArea.body_entered.connect(_on_player_entered)
 	$AnimatedSprite2D.frame_changed.connect(_on_animation_frame_changed)
+	print("Cube ready! Gravity enabled: ", gravity_bullets_enabled)
 
 func _process(delta: float) -> void:
 	if player == null or not is_instance_valid(player):
@@ -78,7 +79,6 @@ func _process(delta: float) -> void:
 			
 			hit_count += 1
 
-			# 🔥 RETALIATION TRIGGER — fires on EVERY hit
 			if save_manager.retaliation_unlocked:
 				clear_all_bullets()
 			
@@ -100,6 +100,7 @@ func _process(delta: float) -> void:
 func _on_player_entered(body: Node2D) -> void:
 	if body is CharacterBody2D and body.name == "Player":
 		player = body
+		print("Player entered detection area!")
 
 		if not run_started:
 			run_started = true
@@ -125,6 +126,7 @@ func start_shooting() -> void:
 		return
 
 	shooting = true
+	print("Starting shooting!")
 
 	$AnimatedSprite2D.frame = 0
 	$AnimatedSprite2D.play("shoot")
@@ -142,18 +144,22 @@ func shoot_volley() -> void:
 	if not shoot_sound.playing:
 		shoot_sound.play()
 
+	# --- Volley system (1, 2, 3, or 4 bullets) ---
 	var bullet_count: int
-
+	
 	if volley_number < 4:
 		bullet_count = volley_number
 	else:
 		bullet_count = randi_range(1, 4)
-
+	
+	print("Shooting volley: ", bullet_count, " bullets")
+	
+	# One homing bullet if 3 or more bullets
 	var homing_index: int = -1
+	if bullet_count >= 3:
+		homing_index = randi_range(0, bullet_count - 1)
 
-	if bullet_count == 4:
-		homing_index = randi_range(0, 3)
-
+	# --- FIXED SPREAD PATTERN ---
 	for i in range(bullet_count):
 		var is_homing: bool = i == homing_index
 		create_bullet(is_homing, i, bullet_count)
@@ -187,21 +193,56 @@ func create_bullet(homing: bool, index: int, total_bullets: int) -> void:
 		Vector2(0, bullet_radius)
 	])
 
+	# --- BULLET COLOR LOGIC ---
 	if gravity_bullets_enabled:
-		visual.color = Color.BLUE
+		# ONLY 1 RED bullet per volley (first bullet is red)
+		if index == 0:
+			visual.color = Color.RED  # RED = PARRYABLE
+			print("Created RED bullet #", index)
+		else:
+			visual.color = Color.BLUE  # BLUE = NOT PARRYABLE (GRAVITY)
+			print("Created BLUE bullet #", index)
 	else:
-		visual.color = Color.RED
+		# No gravity upgrade: ALL bullets are RED (parryable)
+		visual.color = Color.RED  # RED = PARRYABLE
+		print("Created RED bullet #", index)
 
 	bullet.add_child(visual)
 
 	get_tree().current_scene.add_child(bullet)
 
+	# --- FIXED: Better spread pattern ---
 	var direction: Vector2 = global_position.direction_to(player.global_position)
-
+	
 	if total_bullets > 1:
-		var center: float = float(total_bullets - 1) / 2.0
-		var angle_offset: float = (float(index) - center) * bullet_spread
-		direction = direction.rotated(deg_to_rad(angle_offset))
+		# Calculate spread based on bullet count
+		var spread_angle: float
+		var center_offset: float
+		
+		match total_bullets:
+			2:
+				# 2 bullets: spread apart evenly
+				spread_angle = deg_to_rad(bullet_spread * 0.8)
+				center_offset = (float(index) - 0.5) * 2.0
+				direction = direction.rotated(spread_angle * center_offset)
+			
+			3:
+				# 3 bullets: fan pattern (-spread, 0, +spread)
+				var offset = (float(index) - 1.0) / 1.0  # -1, 0, 1
+				spread_angle = deg_to_rad(bullet_spread * 0.7)
+				direction = direction.rotated(spread_angle * offset)
+			
+			4:
+				# 4 bullets: even spread (-1.5, -0.5, 0.5, 1.5)
+				var offset = (float(index) - 1.5) / 1.5  # -1, -0.33, 0.33, 1
+				spread_angle = deg_to_rad(bullet_spread * 0.9)
+				direction = direction.rotated(spread_angle * offset)
+			
+			_:
+				# Default fallback
+				var center: float = float(total_bullets - 1) / 2.0
+				var angle_offset: float = (float(index) - center) * deg_to_rad(bullet_spread * 0.5)
+				direction = direction.rotated(angle_offset)
 
 	bullet.global_position = global_position + direction * spawn_distance
 	bullet.set_meta("homing", homing)
@@ -216,19 +257,24 @@ func create_bullet(homing: bool, index: int, total_bullets: int) -> void:
 
 
 func check_barrage_progress() -> void:
+	# Check if any non-homing bullets remain
 	for bullet in volley_bullets:
 		if is_instance_valid(bullet):
 			if not bullet.get_meta("homing", false):
-				return
+				return  # Still have normal bullets
 
+	# All remaining bullets are homing or gone, clear them
 	volley_bullets.clear()
 
+	# Start next volley if run is active
 	if player != null and is_instance_valid(player) and run_started:
-		start_shooting()
+		if not shooting:  # Make sure we're not already shooting
+			start_shooting()
 
 
 func reset_barrage() -> void:
 	shooting = false
+	print("Barrage reset!")
 
 	volley_number = 1
 	hit_count = 0
@@ -258,3 +304,7 @@ func clear_all_bullets() -> void:
 			bullet.call_deferred("queue_free")
 	bullets.clear()
 	volley_bullets.clear()
+
+
+func is_idle() -> bool:
+	return not run_started and not shooting
